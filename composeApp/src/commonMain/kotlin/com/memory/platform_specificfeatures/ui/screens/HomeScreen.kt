@@ -35,12 +35,14 @@ import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
+import androidx.compose.material.icons.filled.AutoAwesome
 
 @Composable
 fun HomeScreen(
     onNavigateToCreate: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToRead: (Long) -> Unit
+    onNavigateToRead: (Long) -> Unit,
+    onNavigateToChat: () -> Unit = {}
 ) {
     val viewModel: NotesViewModel = koinViewModel()
     val settingsViewModel: SettingsViewModel = koinViewModel()
@@ -51,7 +53,6 @@ fun HomeScreen(
     val filteredNotes    by viewModel.filteredNotes.collectAsState()
     val showDate         by settingsViewModel.showDate.collectAsState()
 
-    // ── Semua warna dari MaterialTheme ───────────────────────
     val bg       = MaterialTheme.colors.background
     val surface  = MaterialTheme.colors.surface
     val pink     = MaterialTheme.colors.primary
@@ -59,7 +60,7 @@ fun HomeScreen(
     val textDark = MaterialTheme.colors.onBackground
     val textMid  = MaterialTheme.colors.onBackground.copy(alpha = 0.5f)
 
-    val categories = listOf("All", "Personal", "Work", "Study")
+    val categories = listOf("All", "Personal", "Work", "Study", "Health")
 
     Scaffold(
         backgroundColor = bg,
@@ -82,7 +83,6 @@ fun HomeScreen(
         ) {
             NetworkStatusIndicator(isConnected = isConnected)
 
-            // Hero illustration — warna dipass dari theme
             HeroCalendarIllustration(
                 primaryColor  = pink,
                 surfaceColor  = surface,
@@ -98,34 +98,59 @@ fun HomeScreen(
                 ) {
                     Column {
                         Text(
-                            text = "My Notes 🌸",
+                            text = "RyNotes",
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = textDark
                         )
                         Text(
-                            text = "Keep your thoughts pretty",
+                            text = "Make your day be more productive",
                             fontSize = 12.sp,
                             color = textMid
                         )
                     }
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(pink.copy(alpha = 0.15f))
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { onNavigateToSettings() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = pink,
-                            modifier = Modifier.size(20.dp)
-                        )
+
+                    // ── Tombol AI Chat + Settings ─────────────
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        // Tombol AI Chat
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(pink.copy(alpha = 0.15f))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) { onNavigateToChat() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.AutoAwesome,
+                                contentDescription = "AI Chat",
+                                tint = pink,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        // Tombol Settings
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(pink.copy(alpha = 0.15f))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) { onNavigateToSettings() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Settings,
+                                contentDescription = "Settings",
+                                tint = pink,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
 
@@ -220,8 +245,6 @@ fun HomeScreen(
     }
 }
 
-// ── Hero Calendar Illustration ────────────────────────────────
-// Warna dipass sebagai parameter → otomatis ikut dark/light mode
 @Composable
 fun HeroCalendarIllustration(
     primaryColor: Color,
@@ -241,41 +264,15 @@ fun HeroCalendarIllustration(
         val h = size.height
         val r = 20.dp.toPx()
 
-        // Card background
-        drawRoundRect(
-            color = surfaceColor,
-            size = Size(w, h),
-            cornerRadius = CornerRadius(r)
-        )
+        drawRoundRect(color = surfaceColor, size = Size(w, h), cornerRadius = CornerRadius(r))
+        drawRoundRect(color = primaryColor, size = Size(w, 40.dp.toPx()), cornerRadius = CornerRadius(r))
+        drawRect(color = primaryColor, topLeft = Offset(0f, 20.dp.toPx()), size = Size(w, 20.dp.toPx()))
 
-        // Header strip
-        drawRoundRect(
-            color = primaryColor,
-            size = Size(w, 40.dp.toPx()),
-            cornerRadius = CornerRadius(r)
-        )
-        drawRect(
-            color = primaryColor,
-            topLeft = Offset(0f, 20.dp.toPx()),
-            size = Size(w, 20.dp.toPx())
-        )
-
-        // Ring kiri & kanan
         listOf(w * 0.3f, w * 0.7f).forEach { cx ->
-            drawCircle(
-                color = pinkPale,
-                radius = 8.dp.toPx(),
-                center = Offset(cx, 40.dp.toPx())
-            )
-            drawCircle(
-                color = surfaceColor,
-                radius = 5.dp.toPx(),
-                center = Offset(cx, 40.dp.toPx()),
-                style = Stroke(width = 2.dp.toPx())
-            )
+            drawCircle(color = pinkPale, radius = 8.dp.toPx(), center = Offset(cx, 40.dp.toPx()))
+            drawCircle(color = surfaceColor, radius = 5.dp.toPx(), center = Offset(cx, 40.dp.toPx()), style = Stroke(width = 2.dp.toPx()))
         }
 
-        // Grid tanggal
         val gridTop = 52.dp.toPx()
         val cellW   = w / 7f
         val cellH   = (h - gridTop - 8.dp.toPx()) / 4f
@@ -285,50 +282,24 @@ fun HeroCalendarIllustration(
             val row = index / 7
             val cx  = cellW * col + cellW / 2f
             val cy  = gridTop + cellH * row + cellH / 2f
-
             when {
-                day == 2 -> drawCircle(
-                    color = primaryColor,
-                    radius = 13.dp.toPx(),
-                    center = Offset(cx, cy)
-                )
-                day < 2 -> drawCircle(
-                    color = pinkLight,
-                    radius = 3.dp.toPx(),
-                    center = Offset(cx, cy)
-                )
-                else -> drawCircle(
-                    color = pinkPale,
-                    radius = 3.dp.toPx(),
-                    center = Offset(cx, cy)
-                )
+                day == 2 -> drawCircle(color = primaryColor, radius = 13.dp.toPx(), center = Offset(cx, cy))
+                day < 2  -> drawCircle(color = pinkLight, radius = 3.dp.toPx(), center = Offset(cx, cy))
+                else     -> drawCircle(color = pinkPale, radius = 3.dp.toPx(), center = Offset(cx, cy))
             }
         }
 
-        // Bunga dekoratif
         listOf(Offset(28.dp.toPx(), h - 22.dp.toPx()), Offset(w - 28.dp.toPx(), h - 22.dp.toPx()))
             .forEach { center ->
                 for (i in 0..4) {
                     val angle = (i * 72f) * (PI / 180f).toFloat()
-                    drawCircle(
-                        color = pinkLight,
-                        radius = 5.dp.toPx(),
-                        center = Offset(
-                            center.x + cos(angle) * 9.dp.toPx(),
-                            center.y + sin(angle) * 9.dp.toPx()
-                        )
-                    )
+                    drawCircle(color = pinkLight, radius = 5.dp.toPx(), center = Offset(center.x + cos(angle) * 9.dp.toPx(), center.y + sin(angle) * 9.dp.toPx()))
                 }
                 drawCircle(color = surfaceColor, radius = 4.dp.toPx(), center = center)
             }
 
-        // Dot dekoratif
         listOf(0.5f, 0.15f, 0.85f).forEach { xRatio ->
-            drawCircle(
-                color = primaryColor.copy(alpha = 0.25f),
-                radius = 3.dp.toPx(),
-                center = Offset(w * xRatio, h - 14.dp.toPx())
-            )
+            drawCircle(color = primaryColor.copy(alpha = 0.25f), radius = 3.dp.toPx(), center = Offset(w * xRatio, h - 14.dp.toPx()))
         }
     }
 }

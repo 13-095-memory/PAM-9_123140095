@@ -1,3 +1,4 @@
+import java.util.Properties
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -7,6 +8,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.kotlinxSerialization)
 }
 
 kotlin {
@@ -39,6 +41,9 @@ kotlin {
 
             // Navigation Android
             implementation("androidx.navigation:navigation-compose:2.7.7")
+
+            // Ktor - Android Engine
+            implementation(libs.ktor.client.okhttp)
         }
 
         commonMain.dependencies {
@@ -66,6 +71,12 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
             implementation("org.jetbrains.compose.material:material-icons-extended:1.6.11")
             implementation("org.jetbrains.compose.material:material-icons-core:1.6.11")
+
+            // Ktor - Core + Serialization
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.kotlinx.serialization.json)
         }
 
 
@@ -76,7 +87,13 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.ktor.client.cio)
         }
+
+        iosMain.dependencies {
+                implementation(libs.ktor.client.darwin)
+            }
+
     }
 }
 
@@ -90,7 +107,23 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        // Baca API key dari local.properties
+        val localProps = rootProject.file("local.properties")
+        val properties = Properties()
+        if (localProps.exists()) {
+            properties.load(localProps.inputStream())
+        }
+        buildConfigField(
+            "String", "GEMINI_API_KEY",
+            "\"${properties.getProperty("GEMINI_API_KEY", "")}\""
+        )
+        buildConfigField(
+            "String", "GROQ_API_KEY",
+            "\"${properties.getProperty("GROQ_API_KEY", "")}\""
+        )
     }
+    buildFeatures { buildConfig = true }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
