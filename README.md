@@ -20,12 +20,16 @@ berinteraksi dengan asisten AI untuk membantu pengelolaan catatan.
 
 **Cara menggunakan:**
 1. Buka aplikasi RyNotes
-2. Tap ikon AI di pojok kanan atas HomeScreen
+2. Tap ikon Bintang di pojok kanan atas HomeScreen atau ikon yang berada di sebelah ikon setting
 3. Ketik pertanyaan atau permintaan
 4. AI akan membalas dalam Bahasa Indonesia
 
 ## Screenshots
-### Chat Screen
-![Device Info](DeviceInfo.jpeg)
-
 ### Home Screen
+![Home_Screen](HomeScreen.jpeg)
+
+### Chat Screen
+![Chat_Screen](ChatScreen.jpeg)
+
+### Chat Interaktif
+![Chat_Interaktif](ChatInteraktif.jpeg)
